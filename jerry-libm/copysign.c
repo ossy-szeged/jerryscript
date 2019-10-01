@@ -34,8 +34,9 @@
 double
 copysign (double x, double y)
 {
-  double_accessor ret;
-  ret.dbl = x;
-  ret.as_int.hi = (__HI (x) & 0x7fffffff) | (__HI (y) & 0x80000000);
-  return ret.dbl;
+  double_accessor x_accessor, y_accessor;
+  x_accessor.dbl = x;
+  y_accessor.dbl = y;
+  x_accessor.as_int.hi = (x_accessor.as_int.hi & 0x7fffffff) | (y_accessor.as_int.hi & 0x80000000);
+  return x_accessor.dbl;
 } /* copysign */

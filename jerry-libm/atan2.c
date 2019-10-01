@@ -64,16 +64,18 @@
 double
 atan2 (double y, double x)
 {
-  double_accessor z;
+  double_accessor z, x_accessor, y_accessor;
   int k, m, hx, hy, ix, iy;
   unsigned lx, ly;
 
-  hx = __HI (x);
+  x_accessor.dbl = x;
+  y_accessor.dbl = y;
+  hx = x_accessor.as_int.hi;
   ix = hx & 0x7fffffff;
-  lx = __LO (x);
-  hy = __HI (y);
+  lx = x_accessor.as_int.lo;
+  hy = y_accessor.as_int.hi;
   iy = hy & 0x7fffffff;
-  ly = __LO (y);
+  ly = y_accessor.as_int.lo;
   if (((ix | ((lx | -lx) >> 31)) > 0x7ff00000) || ((iy | ((ly | -ly) >> 31)) > 0x7ff00000)) /* x or y is NaN */
   {
     return x + y;

@@ -72,12 +72,14 @@ acos (double x)
 {
   double z, p, q, r, w, s, c;
   int hx, ix;
+  double_accessor x_accessor;
 
-  hx = __HI (x);
+  x_accessor.dbl = x;
+  hx = x_accessor.as_int.hi;
   ix = hx & 0x7fffffff;
   if (ix >= 0x3ff00000) /* |x| >= 1 */
   {
-    if (((ix - 0x3ff00000) | __LO (x)) == 0) /* |x| == 1 */
+    if (((ix - 0x3ff00000) | x_accessor.as_int.lo) == 0) /* |x| == 1 */
     {
       if (hx > 0) /* acos(1) = 0  */
       {

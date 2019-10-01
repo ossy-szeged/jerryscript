@@ -42,11 +42,13 @@
 double
 ceil (double x)
 {
+  double_accessor x_accessor;
   int i0, i1, j0;
   unsigned i, j;
 
-  i0 = __HI (x);
-  i1 = __LO (x);
+  x_accessor.dbl = x;
+  i0 = x_accessor.as_int.hi;
+  i1 = x_accessor.as_int.lo;
   j0 = ((i0 >> 20) & 0x7ff) - 0x3ff;
   if (j0 < 20)
   {

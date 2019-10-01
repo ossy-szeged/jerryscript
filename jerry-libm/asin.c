@@ -78,14 +78,15 @@ double
 asin (double x)
 {
   double t, p, q, c, r, s;
-  double_accessor w;
+  double_accessor w, x_accessor;
   int hx, ix;
 
-  hx = __HI (x);
+  x_accessor.dbl = x;
+  hx = x_accessor.as_int.hi;
   ix = hx & 0x7fffffff;
   if (ix >= 0x3ff00000) /* |x| >= 1 */
   {
-    if (((ix - 0x3ff00000) | __LO (x)) == 0) /* asin(1) = +-pi/2 with inexact */
+    if ((ix - 0x3ff00000) | (x_accessor.as_int.lo == 0)) /* asin(1) = +-pi/2 with inexact */
     {
       return x * pio2_hi + x * pio2_lo;
     }

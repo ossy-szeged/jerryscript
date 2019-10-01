@@ -84,12 +84,14 @@ atan (double x)
 {
   double w, s1, s2, z;
   int ix, hx, id;
+  double_accessor x_accessor;
 
-  hx = __HI (x);
+  x_accessor.dbl = x;
+  hx = x_accessor.as_int.hi;
   ix = hx & 0x7fffffff;
   if (ix >= 0x44100000) /* if |x| >= 2^66 */
   {
-    if (ix > 0x7ff00000 || (ix == 0x7ff00000 && (__LO (x) != 0)))
+    if (ix > 0x7ff00000 || (ix == 0x7ff00000 && (x_accessor.as_int.lo != 0)))
     {
       return x + x; /* NaN */
     }
