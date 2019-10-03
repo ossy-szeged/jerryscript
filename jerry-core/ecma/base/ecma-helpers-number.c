@@ -320,7 +320,7 @@ ecma_number_is_zero (ecma_number_t num) /**< ecma-number */
  *                fraction is filled with zero bits,
  *         false - otherwise
  */
-bool
+extern inline bool JERRY_ATTR_ALWAYS_INLINE
 ecma_number_is_infinity (ecma_number_t num) /**< ecma-number */
 {
   JERRY_ASSERT (!ecma_number_is_nan (num));
