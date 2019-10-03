@@ -323,16 +323,7 @@ ecma_number_is_zero (ecma_number_t num) /**< ecma-number */
 extern inline bool JERRY_ATTR_ALWAYS_INLINE
 ecma_number_is_infinity (ecma_number_t num) /**< ecma-number */
 {
-  JERRY_ASSERT (!ecma_number_is_nan (num));
-
-  ecma_number_accessor_t f;
-  f.as_ecma_number_t = num;
-
-#if ENABLED (JERRY_NUMBER_TYPE_FLOAT64)
-  return (f.as_uint64_t & 0x7fffffffffffffffull) == 0x7ff0000000000000ull;
-#else /* !ENABLED (JERRY_NUMBER_TYPE_FLOAT64) */
-  return (f.as_uint32_t & 0x7fffffffu) == 0x7f800000u;
-#endif /* ENABLED (JERRY_NUMBER_TYPE_FLOAT64) */
+  return __builtin_isinf (num);
 } /* ecma_number_is_infinity */
 
 /**
