@@ -220,20 +220,7 @@ ecma_number_get_sign_field (ecma_number_t num) /**< ecma-number */
 extern inline bool JERRY_ATTR_ALWAYS_INLINE
 ecma_number_is_nan (ecma_number_t num) /**< ecma-number */
 {
-  bool is_nan = (num != num);
-
-#ifndef JERRY_NDEBUG
-  uint32_t biased_exp = ecma_number_get_biased_exponent_field (num);
-  uint64_t fraction = ecma_number_get_fraction_field (num);
-
-   /* IEEE-754 2008, 3.4, a */
-  bool is_nan_ieee754 = ((biased_exp == (1u << ECMA_NUMBER_BIASED_EXP_WIDTH) - 1)
-                         && (fraction != 0));
-
-  JERRY_ASSERT (is_nan == is_nan_ieee754);
-#endif /* !JERRY_NDEBUG */
-
-  return is_nan;
+  return __builtin_isnan (num);
 } /* ecma_number_is_nan */
 
 /**
@@ -295,7 +282,7 @@ ecma_number_is_negative (ecma_number_t num) /**< ecma-number */
  * @return true - if fraction is zero and biased exponent is zero,
  *         false - otherwise
  */
-bool
+extern inline bool JERRY_ATTR_ALWAYS_INLINE
 ecma_number_is_zero (ecma_number_t num) /**< ecma-number */
 {
   JERRY_ASSERT (!ecma_number_is_nan (num));
