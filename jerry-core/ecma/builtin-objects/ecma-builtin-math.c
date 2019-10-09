@@ -169,7 +169,7 @@ ecma_builtin_math_object_max_min (bool is_max, /**< 'max' or 'min' operation */
 static ecma_number_t
 ecma_builtin_math_object_trunc (ecma_number_t arg)
 {
-  if (ecma_number_is_nan (arg) || ecma_number_is_infinity (arg) || ecma_number_is_zero (arg))
+  if (!ecma_number_is_finite (arg) || ecma_number_is_zero (arg))
   {
     return arg;
   }
@@ -198,7 +198,7 @@ ecma_builtin_math_object_trunc (ecma_number_t arg)
 static ecma_number_t
 ecma_builtin_math_object_sign (ecma_number_t arg)
 {
-  if (ecma_number_is_nan (arg) || ecma_number_is_zero (arg))
+  if (!ecma_number_is_finite (arg))
   {
     return arg;
   }
@@ -355,9 +355,8 @@ ecma_builtin_math_dispatch_routine (uint16_t builtin_routine_id, /**< built-in w
 #endif /* ENABLED (JERRY_ES2015_BUILTIN) */
       case ECMA_MATH_OBJECT_ROUND:
       {
-        if (ecma_number_is_nan (x)
-            || ecma_number_is_zero (x)
-            || ecma_number_is_infinity (x))
+        if (!ecma_number_is_finite (x)
+            || ecma_number_is_zero (x))
         {
           /* Do nothing. */
         }

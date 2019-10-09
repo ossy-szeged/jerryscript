@@ -36,9 +36,8 @@ ecma_number_t
 ecma_op_number_remainder (ecma_number_t left_num, /**< left operand */
                           ecma_number_t right_num) /**< right operand */
 {
-  if (ecma_number_is_nan (left_num)
+  if (!ecma_number_is_finite (left_num)
       || ecma_number_is_nan (right_num)
-      || ecma_number_is_infinity (left_num)
       || ecma_number_is_zero (right_num))
   {
     return ecma_number_make_nan ();

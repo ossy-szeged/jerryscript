@@ -415,14 +415,10 @@ ecma_date_make_time (ecma_number_t hour, /**< hour value */
                      ecma_number_t sec, /**< second value */
                      ecma_number_t ms) /**< millisecond value */
 {
-  if (ecma_number_is_nan (hour)
-      || ecma_number_is_nan (min)
-      || ecma_number_is_nan (sec)
-      || ecma_number_is_nan (ms)
-      || ecma_number_is_infinity (hour)
-      || ecma_number_is_infinity (min)
-      || ecma_number_is_infinity (sec)
-      || ecma_number_is_infinity (ms))
+  if (!ecma_number_is_finite (hour)
+      || !ecma_number_is_finite (min)
+      || !ecma_number_is_finite (sec)
+      || !ecma_number_is_finite (ms))
   {
     return ecma_number_make_nan ();
   }
@@ -453,12 +449,9 @@ ecma_date_make_day (ecma_number_t year, /**< year value */
                     ecma_number_t date) /**< date value */
 {
   /* 1. */
-  if (ecma_number_is_nan (year)
-      || ecma_number_is_nan (month)
-      || ecma_number_is_nan (date)
-      || ecma_number_is_infinity (year)
-      || ecma_number_is_infinity (month)
-      || ecma_number_is_infinity (date))
+  if (!ecma_number_is_finite (year)
+      || !ecma_number_is_finite (month)
+      || !ecma_number_is_finite (date))
   {
     return ecma_number_make_nan ();
   }
@@ -541,8 +534,7 @@ ecma_date_make_date (ecma_number_t day, /**< day value */
 ecma_number_t
 ecma_date_time_clip (ecma_number_t time) /**< time value */
 {
-  if (ecma_number_is_nan (time)
-      || ecma_number_is_infinity (time)
+  if (!ecma_number_is_finite (time)
       || fabs (time) > ECMA_DATE_MAX_VALUE)
   {
     return ecma_number_make_nan ();

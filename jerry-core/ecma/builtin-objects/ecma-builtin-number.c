@@ -112,7 +112,7 @@ ecma_builtin_number_object_is_finite (ecma_value_t this_arg, /**< this argument 
   if (ecma_is_value_number (arg))
   {
     ecma_number_t num = ecma_get_number_from_value (arg);
-    if (!(ecma_number_is_nan (num) || ecma_number_is_infinity (num)))
+    if (ecma_number_is_finite (num))
     {
       return ECMA_VALUE_TRUE;
     }
@@ -168,7 +168,7 @@ ecma_builtin_number_object_is_integer (ecma_value_t this_arg, /**< this argument
 
   ecma_number_t num = ecma_get_number_from_value (arg);
 
-  if (ecma_number_is_nan (num) || ecma_number_is_infinity (num))
+  if (!ecma_number_is_finite (num))
   {
     return ECMA_VALUE_FALSE;
   }
@@ -205,7 +205,7 @@ ecma_builtin_number_object_is_safe_integer (ecma_value_t this_arg, /**< this arg
 
   ecma_number_t num = ecma_get_number_from_value (arg);
 
-  if (ecma_number_is_nan (num) || ecma_number_is_infinity (num))
+  if (!ecma_number_is_finite (num))
   {
     return ECMA_VALUE_FALSE;
   }

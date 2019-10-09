@@ -507,10 +507,7 @@ ecma_builtin_global_object_is_nan (ecma_number_t arg_num) /**< routine's first a
 static ecma_value_t
 ecma_builtin_global_object_is_finite (ecma_number_t arg_num) /**< routine's first argument */
 {
-  bool is_finite = !(ecma_number_is_nan (arg_num)
-                     || ecma_number_is_infinity (arg_num));
-
-  return ecma_make_boolean_value (is_finite);
+  return ecma_make_boolean_value (ecma_number_is_finite (arg_num));
 } /* ecma_builtin_global_object_is_finite */
 
 /**

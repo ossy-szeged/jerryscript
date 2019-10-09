@@ -143,7 +143,7 @@ ecma_builtin_date_prototype_to_json (ecma_value_t this_arg) /**< this argument *
   {
     ecma_number_t num_value = ecma_get_number_from_value (tv);
 
-    if (ecma_number_is_nan (num_value) || ecma_number_is_infinity (num_value))
+    if (!ecma_number_is_finite (num_value))
     {
       ret_value = ECMA_VALUE_NULL;
     }

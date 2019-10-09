@@ -251,8 +251,7 @@ ecma_builtin_number_prototype_object_to_string (ecma_number_t this_arg_number, /
 {
 
   if (arguments_list_len == 0
-      || ecma_number_is_nan (this_arg_number)
-      || ecma_number_is_infinity (this_arg_number)
+      || !ecma_number_is_finite (this_arg_number)
       || ecma_number_is_zero (this_arg_number)
       || (arguments_list_len > 0 && ecma_is_value_undefined (arguments_list_p[0])))
   {
