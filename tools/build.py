@@ -120,6 +120,8 @@ def get_arguments():
                          help='enable logging (%(choices)s)')
     coregrp.add_argument('--mem-heap', metavar='SIZE', type=int,
                          help='size of memory heap (in kilobytes)')
+    coregrp.add_argument('--gc-limit', metavar='SIZE', type=int,
+                         help='memory usage limit to trigger garbage collection (in bytes)')
     coregrp.add_argument('--stack-limit', metavar='SIZE', type=int,
                          help='maximum stack usage (in kilobytes)')
     coregrp.add_argument('--mem-stats', metavar='X', choices=['ON', 'OFF'], type=str.upper,
