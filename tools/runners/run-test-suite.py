@@ -17,8 +17,10 @@
 from __future__ import print_function
 import argparse
 import os
+import re
 import subprocess
 import sys
+import yaml
 
 import util
 
@@ -68,6 +70,10 @@ def get_tests(test_dir, test_list, skip_list):
         for skipped in skip_list:
             if skipped in test:
                 return False
+
+        if os.path.join(os.path.sep, 'annexB', '') in test or os.path.join(os.path.sep, 'intl402', '') in test:
+            return False
+
         return True
 
     return [test for test in tests if filter_tests(test)]
@@ -79,13 +85,13 @@ def get_platform_cmd_prefix():
     return []
 
 
-def execute_test_command(test_cmd):
+def execute_test_command(test_cmd, input_string=None):
     kwargs = {}
     if sys.version_info.major >= 3:
         kwargs['encoding'] = 'unicode_escape'
         kwargs['text'] = True
-    process = subprocess.Popen(test_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **kwargs)
-    stdout = process.communicate()[0]
+    process = subprocess.Popen(test_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE, **kwargs)
+    stdout = process.communicate(input_string)[0]
     return (process.returncode, stdout)
 
 
@@ -132,24 +138,92 @@ def run_normal_tests(args, tests):
     total = len(tests)
     tested = 0
     passed = 0
+    failed = 0
     for test in tests:
+
+        if test.endswith('_FIXTURE.js'):
+            continue
+
         tested += 1
         test_path = os.path.relpath(test)
         is_expected_to_fail = os.path.join(os.path.sep, 'fail', '') in test
-        (returncode, stdout) = execute_test_command(test_cmd + [test])
 
-        if bool(returncode) == is_expected_to_fail:
-            passed += 1
-            if not args.quiet:
-                passed_string = 'PASS' + (' (XFAIL)' if is_expected_to_fail else '')
-                util.print_test_result(tested, total, True, passed_string, test_path)
-        else:
-            passed_string = 'FAIL%s (%d)' % (' (XPASS)' if is_expected_to_fail else '', returncode)
-            util.print_test_result(tested, total, False, passed_string, test_path)
-            print("================================================")
-            print(stdout)
-            print("================================================")
+        with open(test, 'r') as content_file:
+            content = content_file.read()
+        metadata_str = re.search(r'\*---(.*)---\*', content, flags=re.MULTILINE|re.DOTALL)
+        metadata = yaml.load(metadata_str.group(1))
 
+        is_expected_to_fail |= 'negative' in metadata
+
+        if not 'includes' in metadata:
+            metadata['includes'] = []
+
+        if not 'es6id' in metadata:
+            continue
+
+#        tested_feature = 'WeakMap'
+#        if not 'features' in metadata or not tested_feature in metadata['features']:
+#            continue
+
+        run_in_strict_mode = True
+        run_in_normal_mode = True
+        if 'flags' in metadata:
+            if 'onlyStrict' in metadata['flags']:
+              run_in_normal_mode = False
+            elif 'noStrict' in metadata['flags']:
+              run_in_strict_mode = False
+
+        with open('/home/oszi/test262/harness/assert.js', 'r') as content_file:
+            harness1 = content_file.read()
+            full_test_content = harness1
+
+        with open('/home/oszi/test262/harness/sta.js', 'r') as content_file:
+            harness2 = content_file.read()
+            full_test_content += harness2
+
+        for x in metadata['includes']:
+            with open(os.path.join('/home/oszi/test262/harness/', x), 'r') as content_file:
+                harness_include = content_file.read()
+                full_test_content += harness_include
+
+        full_test_content += content
+
+# non-strict run
+        if run_in_normal_mode:
+            (returncode, stdout) = execute_test_command(test_cmd + ['-'], full_test_content)
+
+            if bool(returncode) == is_expected_to_fail:
+                passed += 1
+                if not args.quiet:
+                    passed_string = 'PASS' + (' (XFAIL)' if is_expected_to_fail else '')
+                    util.print_test_result(tested, total, True, passed_string, test_path + ' (non-strict mode)')
+            else:
+                failed += 1
+                passed_string = 'FAIL%s (%d)' % (' (XPASS)' if is_expected_to_fail else '', returncode)
+                util.print_test_result(tested, total, False, passed_string, test_path + ' (non-strict mode)')
+                print("================================================")
+                print(stdout)
+                print("================================================")
+
+# strict run
+        if run_in_strict_mode:
+            (returncode, stdout) = execute_test_command(test_cmd + ['-'], '"use strict";\n' + full_test_content)
+
+            if bool(returncode) == is_expected_to_fail:
+                passed += 1
+                if not args.quiet:
+                    passed_string = 'PASS' + (' (XFAIL)' if is_expected_to_fail else '')
+                    util.print_test_result(tested, total, True, passed_string, test_path + ' (strict mode)')
+            else:
+                failed += 1
+                passed_string = 'FAIL%s (%d)' % (' (XPASS)' if is_expected_to_fail else '', returncode)
+                util.print_test_result(tested, total, False, passed_string, test_path + ' (strict mode)')
+                print("================================================")
+                print(stdout)
+                print("================================================")
+
+
+    print("failed tests: %d\n\n" % (failed))
     return passed
 
 
