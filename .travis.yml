@@ -12,4 +12,24 @@ matrix:
     - name: "Windows/x86 Build"
       script: tools/build.py
 
+    - name: "Windows/x86 Jerry-tests"
+      env:
+        - OPTS="--jerry-tests"
+
+    - name: "Windows/x86 Jerry-tests"
+      env:
+        - OPTS="--jerry-test-suite"
+
+    - name: "Windows/x86 Build Tests"
+      env:
+        - OPTS="--buildoption-test"
+
+    - name: "Windows/x86 Conformance Tests"
+      env:
+        - OPTS="--test262"
+
+    - name: "Windows/x86 Unit Tests"
+      env:
+        - OPTS="--unittests"
+
   fast_finish: true
