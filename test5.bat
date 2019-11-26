@@ -1,1 +1,1 @@
-tools\run-tests --unittests
+tools\run-tests.py --unittests

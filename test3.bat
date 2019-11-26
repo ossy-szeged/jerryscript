@@ -1,1 +1,1 @@
-tools\run-tests --buildoption-tests
+tools\run-tests.py --buildoption-tests
