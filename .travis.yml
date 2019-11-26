@@ -3,7 +3,6 @@ os: windows
 
 # Default job task: run tests as defined in the $OPT environment variable.
 # Jobs can redefine the 'script' stage in the matrix below.
-script: travis_wait 60 tools/run-tests.py $OPTS
 
 # All the job definitions in the matrix.
 matrix:
@@ -13,23 +12,18 @@ matrix:
       script: tools/build.py
 
     - name: "Windows/x86 Jerry-tests"
-      env:
-        - OPTS="--jerry-tests"
+      script: test1.bat
 
-    - name: "Windows/x86 Jerry-tests"
-      env:
-        - OPTS="--jerry-test-suite"
+    - name: "Windows/x86 Jerry testsuite"
+      script: test2.bat
 
     - name: "Windows/x86 Build Tests"
-      env:
-        - OPTS="--buildoption-test"
+      script: test3.bat
 
     - name: "Windows/x86 Conformance Tests"
-      env:
-        - OPTS="--test262"
+      script: test4.bat
 
     - name: "Windows/x86 Unit Tests"
-      env:
-        - OPTS="--unittests"
+      script: test5.bat
 
   fast_finish: true
