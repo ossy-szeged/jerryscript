@@ -12,18 +12,18 @@ matrix:
       script: tools/build.py
 
     - name: "Windows/x86 Jerry-tests"
-      script: test1.bat
+      script: ./test1.bat
 
     - name: "Windows/x86 Jerry testsuite"
-      script: test2.bat
+      script: ./test2.bat
 
     - name: "Windows/x86 Build Tests"
-      script: test3.bat
+      script: ./test3.bat
 
     - name: "Windows/x86 Conformance Tests"
-      script: test4.bat
+      script: ./test4.bat
 
     - name: "Windows/x86 Unit Tests"
-      script: test5.bat
+      script: ./test5.bat
 
   fast_finish: true
