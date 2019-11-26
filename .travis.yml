@@ -1,4 +1,3 @@
-language: c
 os: windows
 
 # Default job task: run tests as defined in the $OPT environment variable.
@@ -11,11 +10,11 @@ matrix:
 
     - name: "Windows/x86 Jerry-tests"
       env:
-        - OPTS="--quiet --jerry-tests"
+        - OPTS="--jerry-tests"
 
     - name: "Windows/x86 Jerry-tests"
       env:
-        - OPTS="--quiet  --jerry-test-suite"
+        - OPTS="--jerry-test-suite"
 
     - name: "Windows/x86 Build Tests"
       env:
