@@ -1,1 +1,1 @@
-tools/run-tests --jerry-testsuite
+tools\run-tests --jerry-testsuite

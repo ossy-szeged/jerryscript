@@ -1,1 +1,1 @@
-tools/run-tests --test262
+tools\run-tests --test262

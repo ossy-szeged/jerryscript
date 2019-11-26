@@ -1,1 +1,1 @@
-tools/run-tests --jerry-tests
+tools\run-tests --jerry-tests
