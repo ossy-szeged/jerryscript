@@ -2774,7 +2774,7 @@ vm_loop (vm_frame_ctx_t *frame_ctx_p) /**< frame context */
                 && left_value != 0
                 && right_value != 0)
             {
-              *stack_top_p++ = ecma_integer_multiply (left_integer, right_integer);
+              *stack_top_p++ = ecma_make_integer_value (left_integer * right_integer);
               continue;
             }
 
