@@ -220,6 +220,11 @@ ecma_number_get_sign_field (ecma_number_t num) /**< ecma-number */
 extern inline bool JERRY_ATTR_ALWAYS_INLINE
 ecma_number_is_nan (ecma_number_t num) /**< ecma-number */
 {
+#if defined (__GNUC__) || defined (__clang__)
+  return __builtin_isnan (num);
+#elif defined (WIN32)
+  return isnan (num);
+#else
   bool is_nan = (num != num);
 
 #ifndef JERRY_NDEBUG
@@ -234,6 +239,7 @@ ecma_number_is_nan (ecma_number_t num) /**< ecma-number */
 #endif /* !JERRY_NDEBUG */
 
   return is_nan;
+#endif
 } /* ecma_number_is_nan */
 
 /**
