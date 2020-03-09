@@ -318,15 +318,21 @@ ecma_number_is_zero (ecma_number_t num) /**< ecma-number */
  *                fraction is filled with zero bits,
  *         false - otherwise
  */
-bool
+extern inline bool JERRY_ATTR_ALWAYS_INLINE
 ecma_number_is_infinity (ecma_number_t num) /**< ecma-number */
 {
+#if defined (__GNUC__) || defined (__clang__)
+  return __builtin_isinf (num);
+#elif defined (WIN32)
+  return isinf (num);
+#else
   uint32_t biased_exp = ecma_number_get_biased_exponent_field (num);
   uint64_t fraction = ecma_number_get_fraction_field (num);
 
   /* IEEE-754 2008, 3.4, b */
   return ((biased_exp  == (1u << ECMA_NUMBER_BIASED_EXP_WIDTH) - 1)
           && (fraction == 0));
+#endif
 } /* ecma_number_is_infinity */
 
 /**
