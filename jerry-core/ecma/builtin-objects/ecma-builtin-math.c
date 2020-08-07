@@ -266,7 +266,7 @@ ecma_builtin_math_object_hypot (const ecma_value_t *arg, /**< arguments list */
 static ecma_number_t
 ecma_builtin_math_object_trunc (ecma_number_t arg)
 {
-  if (ecma_number_is_nan (arg) || ecma_number_is_infinity (arg) || ecma_number_is_zero (arg))
+  if (!ecma_number_is_finite (arg) || ecma_number_is_zero (arg))
   {
     return arg;
   }

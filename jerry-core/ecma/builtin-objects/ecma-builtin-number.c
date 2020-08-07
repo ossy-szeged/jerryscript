@@ -128,7 +128,7 @@ ecma_builtin_number_object_is_integer_helper (ecma_value_t arg, /**< routine's a
                                               ecma_number_t num, /**< this number */
                                               bool is_safe) /**< is the number safe */
 {
-  if (ecma_number_is_nan (num) || ecma_number_is_infinity (num))
+  if (!ecma_number_is_finite (num))
   {
     return ECMA_VALUE_FALSE;
   }
@@ -180,7 +180,7 @@ ecma_builtin_number_dispatch_routine (uint16_t builtin_routine_id, /**< built-in
   {
     case ECMA_NUMBER_OBJECT_ROUTINE_IS_FINITE:
     {
-      return ecma_make_boolean_value (!(ecma_number_is_nan (num) || ecma_number_is_infinity (num)));
+      return ecma_make_boolean_value (ecma_number_is_finite (num));
     }
     case ECMA_NUMBER_OBJECT_ROUTINE_IS_NAN:
     {

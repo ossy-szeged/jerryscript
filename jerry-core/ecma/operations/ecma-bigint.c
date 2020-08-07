@@ -343,7 +343,7 @@ ecma_bigint_number_to_digits (ecma_number_t number, /**< ecma number */
 ecma_value_t
 ecma_bigint_number_to_bigint (ecma_number_t number) /**< ecma number */
 {
-  if (ecma_number_is_nan (number) || ecma_number_is_infinity (number))
+  if (!ecma_number_is_finite (number))
   {
     return ecma_raise_range_error (ECMA_ERR_MSG ("Infinity or NaN cannot be converted to BigInt"));
   }
@@ -468,7 +468,7 @@ ecma_bigint_is_equal_to_number (ecma_value_t left_value, /**< left BigInt value 
 {
   JERRY_ASSERT (ecma_is_value_bigint (left_value));
 
-  if (ecma_number_is_nan (right_value) || ecma_number_is_infinity (right_value))
+  if (!ecma_number_is_finite (right_value))
   {
     return false;
   }

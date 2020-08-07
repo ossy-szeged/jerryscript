@@ -158,7 +158,7 @@ ecma_builtin_date_prototype_to_json (ecma_value_t this_arg) /**< this argument *
 
     ecma_free_value (tv);
 
-    if (ecma_number_is_nan (num_value) || ecma_number_is_infinity (num_value))
+    if (!ecma_number_is_finite(num_value))
     {
       ecma_free_value (obj);
       return ECMA_VALUE_NULL;
@@ -660,7 +660,7 @@ ecma_builtin_date_prototype_dispatch_routine (uint16_t builtin_routine_id, /**< 
 
   if (builtin_routine_id == ECMA_DATE_PROTOTYPE_TO_ISO_STRING)
   {
-    if (ecma_number_is_nan (*prim_value_p) || ecma_number_is_infinity (*prim_value_p))
+    if (!ecma_number_is_finite (*prim_value_p))
     {
       return ecma_raise_range_error (ECMA_ERR_MSG ("Date must be a finite number."));
     }

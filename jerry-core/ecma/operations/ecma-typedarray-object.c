@@ -132,7 +132,7 @@ ecma_typedarray_setter_number_to_uint32 (ecma_number_t value) /**< the number va
 {
   uint32_t uint32_value = 0;
 
-  if (!ecma_number_is_nan (value) && !ecma_number_is_infinity (value))
+  if (ecma_number_is_finite (value))
   {
     bool is_negative = false;
 

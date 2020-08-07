@@ -1335,7 +1335,7 @@ ecma_builtin_json_serialize_property (ecma_json_stringify_context_t *context_p, 
     ecma_number_t num_value = ecma_get_number_from_value (value);
 
     /* 10.a */
-    if (!ecma_number_is_nan (num_value) && !ecma_number_is_infinity (num_value))
+    if (ecma_number_is_finite (num_value))
     {
       ecma_string_t *result_string_p = ecma_op_to_string (value);
       JERRY_ASSERT (result_string_p != NULL);
