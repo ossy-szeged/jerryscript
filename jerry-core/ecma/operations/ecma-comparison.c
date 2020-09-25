@@ -391,14 +391,8 @@ ecma_op_abstract_relational_compare (ecma_value_t x, /**< first operand */
       ecma_number_t nx;
       ecma_number_t ny;
 
-      if (ECMA_IS_VALUE_ERROR (ecma_op_to_number (px, &nx)))
-      {
-        ecma_free_value (prim_second_converted_value);
-        ecma_free_value (prim_first_converted_value);
-        return ECMA_VALUE_ERROR;
-      }
-
-      if (ECMA_IS_VALUE_ERROR (ecma_op_to_number (py, &ny)))
+      if (ECMA_IS_VALUE_ERROR (ecma_op_to_number (px, &nx))
+          || ECMA_IS_VALUE_ERROR (ecma_op_to_number (py, &ny)))
       {
         ecma_free_value (prim_second_converted_value);
         ecma_free_value (prim_first_converted_value);
