@@ -634,11 +634,11 @@ scanner_pop_literal_pool (parser_context_t *context_p, /**< context */
 
       intptr_t diff = (intptr_t) (literal_p->char_p - prev_source_p);
 
-      if (diff >= 1 && diff <= UINT8_MAX)
+      if (diff >= 1 && diff <= (intptr_t) UINT8_MAX)
       {
         compressed_size += 2 + 1;
       }
-      else if (diff >= -UINT8_MAX && diff <= (intptr_t) UINT16_MAX)
+      else if (diff >= -(intptr_t) UINT8_MAX && diff <= (intptr_t) UINT16_MAX)
       {
         compressed_size += 2 + 2;
       }
@@ -908,11 +908,11 @@ scanner_pop_literal_pool (parser_context_t *context_p, /**< context */
 
       intptr_t diff = (intptr_t) (literal_p->char_p - prev_source_p);
 
-      if (diff >= 1 && diff <= UINT8_MAX)
+      if (diff >= 1 && diff <= (intptr_t) UINT8_MAX)
       {
         data_p[-1] = (uint8_t) diff;
       }
-      else if (diff >= -UINT8_MAX && diff <= (intptr_t) UINT16_MAX)
+      else if (diff >= -(intptr_t)UINT8_MAX && diff <= (intptr_t) UINT16_MAX)
       {
         if (diff < 0)
         {
@@ -2053,7 +2053,7 @@ scanner_check_variables (parser_context_t *context_p) /**< context */
     {
       int32_t diff = ((int32_t) data_p[2]) | ((int32_t) data_p[3]) << 8;
 
-      if (diff <= UINT8_MAX)
+      if (diff <= (intptr_t) UINT8_MAX)
       {
         diff = -diff;
       }
@@ -2203,7 +2203,7 @@ scanner_create_variables (parser_context_t *context_p, /**< context */
     {
       int32_t diff = ((int32_t) data_p[2]) | ((int32_t) data_p[3]) << 8;
 
-      if (diff <= UINT8_MAX)
+      if (diff <= (intptr_t) UINT8_MAX)
       {
         diff = -diff;
       }
