@@ -17,12 +17,12 @@
 #include <time.h>
 #endif /* HAVE_TM_GMTOFF */
 
-#ifdef _WINDOWS
+#ifdef __WIN32
 #include <windows.h>
 #include <winbase.h>
 #include <winnt.h>
 #include <time.h>
-#endif /* _WINDOWS */
+#endif /* __WIN32 */
 
 #ifdef __GNUC__
 #include <sys/time.h>
@@ -31,15 +31,15 @@
 #include "jerryscript-port.h"
 #include "jerryscript-port-default.h"
 
-#ifdef _WINDOWS
+#ifdef __WIN32
 /* https://support.microsoft.com/en-us/help/167296/how-to-convert-a-unix-time-t-to-a-win32-filetime-or-systemtime */
-void UnixTimeToFileTime (LONGLONG t, LPFILETIME pft)
+static void UnixTimeToFileTime (LONGLONG t, LPFILETIME pft)
 {
   LONGLONG ll = t * 10000000 + 116444736000000000;
   pft->dwLowDateTime = (DWORD) ll;
-  pft->dwHighDateTime = ll >> 32;
+  pft->dwHighDateTime = (DWORD)(ll >> 32);
 } /* UnixTimeToFileTime */
-#endif /* _WINDOWS */
+#endif /* __WIN32 */
 
 /**
  * Default implementation of jerry_port_get_local_time_zone_adjustment. Uses the 'tm_gmtoff' field
@@ -65,12 +65,12 @@ double jerry_port_get_local_time_zone_adjustment (double unix_ms,  /**< ms since
 #else /* !HAVE_TM_GMTOFF */
   (void) unix_ms;
   (void) is_utc;
-#ifdef _WINDOWS
+#ifdef __WIN32
   FILETIME fileTime, localFileTime;
   SYSTEMTIME systemTime, localSystemTime;
   ULARGE_INTEGER time, localTime;
 
-  _tzset ();
+  //_tzset ();
   UnixTimeToFileTime ((LONGLONG) (unix_ms / 1000), &fileTime);
 
   if (FileTimeToSystemTime (&fileTime, &systemTime)
@@ -81,9 +81,9 @@ double jerry_port_get_local_time_zone_adjustment (double unix_ms,  /**< ms since
     time.HighPart = fileTime.dwHighDateTime;
     localTime.LowPart = localFileTime.dwLowDateTime;
     localTime.HighPart = localFileTime.dwHighDateTime;
-    return ((LONGLONG) localTime.QuadPart - (LONGLONG) time.QuadPart) / 10000;
+    return (double) (((LONGLONG) localTime.QuadPart - (LONGLONG) time.QuadPart) / 10000);
   }
-#endif /* _WINDOWS */
+#endif /* __WIN32 */
   return 0.0;
 #endif /* HAVE_TM_GMTOFF */
 } /* jerry_port_get_local_time_zone_adjustment */
@@ -107,11 +107,11 @@ double jerry_port_get_current_time (void)
   }
 #endif /* __GNUC__ */
 
-#ifdef _WINDOWS
+#ifdef __WIN32
   time_t ltime;
   time (&ltime);
   return ltime * 1000;
-#endif /* _WINDOWS */
+#endif /* __WIN32 */
 
   return 0.0;
 } /* jerry_port_get_current_time */

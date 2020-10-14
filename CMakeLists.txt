@@ -205,6 +205,8 @@ if(USING_GCC)
   endif()
 endif()
 
+jerry_add_compile_flags(-Wno-deprecated-declarations)
+
 if(USING_CLANG)
   jerry_add_compile_flags(-Wno-nested-anon-types -Wno-static-in-inline)
 endif()
