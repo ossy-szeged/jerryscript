@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright JS Foundation and other contributors, http://js.foundation
 #
@@ -386,34 +386,23 @@ def is_windows():
 
 class TempFile(object):
 
-    def __init__(self, suffix="", prefix="tmp", text=False):
-        self.suffix = suffix
-        self.prefix = prefix
-        self.text = text
-        self.file_desc = None
-        self.name = None
+    def __init__(self, suffix="", prefix="tmp"):
         self.is_closed = False
-        self.open_file()
-
-    def open_file(self):
-        (self.file_desc, self.name) = tempfile.mkstemp(
-            suffix=self.suffix,
-            prefix=self.prefix,
-            text=self.text)
+        self.file_object = tempfile.NamedTemporaryFile(mode='w+t', suffix=suffix, prefix=prefix, delete=False)
+        self.name = self.file_object.name
 
     def write(self, string):
-        os.write(self.file_desc, string)
+        self.file_object.write(string)
 
     def read(self):
-        file_desc = file(self.name)
-        result = file_desc.read()
-        file_desc.close()
+        with open(self.name, "rt", newline='', errors='ignore') as file_desc:
+            result = file_desc.read()
         return result
 
     def close(self):
         if not self.is_closed:
             self.is_closed = True
-            os.close(self.file_desc)
+            self.file_object.close()
 
     def dispose(self):
         try:
@@ -495,7 +484,7 @@ class TestCase(object):
         self.name = name
         self.full_path = full_path
         self.strict_mode = strict_mode
-        with open(self.full_path, "rb") as file_desc:
+        with open(self.full_path, "rt", newline='') as file_desc:
             self.contents = file_desc.read()
         test_record = parse_test_record(self.contents, name)
         self.test = test_record["test"]
@@ -614,8 +603,8 @@ class TestCase(object):
             process = subprocess.Popen(
                 args,
                 shell=False,
-                stdout=stdout.file_desc,
-                stderr=stderr.file_desc
+                stdout=stdout.file_object,
+                stderr=stderr.file_object
             )
             timer = threading.Timer(TEST262_CASE_TIMEOUT, process.kill)
             timer.start()
@@ -762,9 +751,8 @@ class TestSuite(object):
         if not name in self.include_cache:
             static = path.join(self.lib_root, name)
             if path.exists(static):
-                with open(static) as file_desc:
+                with open(static, 'rt', newline='') as file_desc:
                     contents = file_desc.read()
-                    contents = re.sub(r'\r\n', '\n', contents)
                     self.include_cache[name] = contents + "\n"
             else:
                 report_error("Can't find: " + static)
