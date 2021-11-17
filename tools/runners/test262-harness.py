@@ -604,7 +604,9 @@ class TestCase(object):
                 args,
                 shell=False,
                 stdout=stdout.file_object,
-                stderr=stderr.file_object
+                stderr=stderr.file_object,
+                errors='ignore',
+                text=True
             )
             timer = threading.Timer(TEST262_CASE_TIMEOUT, process.kill)
             timer.start()
