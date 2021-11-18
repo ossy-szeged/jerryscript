@@ -388,14 +388,14 @@ class TempFile(object):
 
     def __init__(self, suffix="", prefix="tmp"):
         self.is_closed = False
-        self.file_object = tempfile.NamedTemporaryFile(mode='w+t', suffix=suffix, prefix=prefix, delete=False)
+        self.file_object = tempfile.NamedTemporaryFile(mode='w+t', suffix=suffix, prefix=prefix, delete=False, encoding='utf-8', newline='')
         self.name = self.file_object.name
 
     def write(self, string):
         self.file_object.write(string)
 
     def read(self):
-        with open(self.name, "rt", newline='', errors='ignore') as file_desc:
+        with open(self.name, "rt", newline='', errors='ignore', encoding='utf-8') as file_desc:
             result = file_desc.read()
         return result
 
@@ -407,7 +407,7 @@ class TempFile(object):
     def dispose(self):
         try:
             self.close()
-            os.unlink(self.name)
+            #os.unlink(self.name)
         except OSError as exception:
             logging.error("Error disposing temp file: %s", str(exception))
 
@@ -484,7 +484,7 @@ class TestCase(object):
         self.name = name
         self.full_path = full_path
         self.strict_mode = strict_mode
-        with open(self.full_path, "rt", newline='') as file_desc:
+        with open(self.full_path, "rt", newline='', errors='ignore', encoding='utf-8') as file_desc:
             self.contents = file_desc.read()
         test_record = parse_test_record(self.contents, name)
         self.test = test_record["test"]
@@ -606,7 +606,8 @@ class TestCase(object):
                 stdout=stdout.file_object,
                 stderr=stderr.file_object,
                 errors='ignore',
-                text=True
+                text=True,
+                encoding='utf-8'
             )
             timer = threading.Timer(TEST262_CASE_TIMEOUT, process.kill)
             timer.start()
@@ -753,7 +754,7 @@ class TestSuite(object):
         if not name in self.include_cache:
             static = path.join(self.lib_root, name)
             if path.exists(static):
-                with open(static, 'rt', newline='') as file_desc:
+                with open(static, 'rt', newline='', errors='ignore', encoding='utf-8') as file_desc:
                     contents = file_desc.read()
                     self.include_cache[name] = contents + "\n"
             else:

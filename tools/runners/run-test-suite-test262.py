@@ -26,7 +26,7 @@ import util
 
 def get_platform_cmd_prefix():
     if sys.platform == 'win32':
-        return ['cmd', '/S', '/C']
+        return ['cmd', '/S', '/C', 'python3', '-X', 'utf8']
     return ['python3']  # The official test262.py isn't python3 compatible, but has python shebang.
 
 
