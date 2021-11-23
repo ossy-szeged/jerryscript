@@ -78,7 +78,7 @@ def get_tests(test_dir, test_list, skip_list):
 def execute_test_command(test_cmd):
     kwargs = {}
     if sys.version_info.major >= 3:
-        kwargs['encoding'] = 'unicode_escape'
+        kwargs['errors'] = 'ignore'
     process = subprocess.Popen(test_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                universal_newlines=True, **kwargs)
     stdout = process.communicate()[0]
@@ -120,7 +120,7 @@ def main(args):
 
 
 def run_normal_tests(args, tests):
-    test_cmd = util.get_platform_cmd_prefix()
+    test_cmd = []
     if args.runtime:
         test_cmd.append(args.runtime)
     test_cmd.extend([args.engine, '--call-on-exit', '__checkAsync'])
@@ -155,8 +155,8 @@ def run_normal_tests(args, tests):
 
 
 def run_snapshot_tests(args, tests):
-    execute_snapshot_cmd = util.get_platform_cmd_prefix()
-    generate_snapshot_cmd = util.get_platform_cmd_prefix()
+    execute_snapshot_cmd = []
+    generate_snapshot_cmd = []
     if args.runtime:
         execute_snapshot_cmd.append(args.runtime)
         generate_snapshot_cmd.append(args.runtime)

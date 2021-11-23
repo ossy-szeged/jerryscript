@@ -24,12 +24,6 @@ import sys
 
 import util
 
-def get_platform_cmd_prefix():
-    if sys.platform == 'win32':
-        return ['cmd', '/S', '/C', 'python3', '-X', 'utf8']
-    return ['python3']  # The official test262.py isn't python3 compatible, but has python shebang.
-
-
 def get_arguments():
     execution_runtime = os.environ.get('RUNTIME', '')
     parser = argparse.ArgumentParser()
@@ -196,8 +190,8 @@ def main(args):
     else:
         test262_harness_path = os.path.join(args.test262_harness_dir, 'test262-harness.py')
 
-    test262_command = get_platform_cmd_prefix() + \
-                      [test262_harness_path,
+    test262_command =  [sys.executable,
+                       test262_harness_path,
                        '--command', command,
                        '--tests', args.test_dir,
                        '--summary']

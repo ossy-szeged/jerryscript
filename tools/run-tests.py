@@ -264,14 +264,10 @@ def create_binary(job, options):
             if option not in build_args:
                 build_args.append(option)
 
-    build_cmd = util.get_python_cmd_prefix()
-    build_cmd.append(settings.BUILD_SCRIPT)
+    build_cmd = [sys.executable, settings.BUILD_SCRIPT]
     build_cmd.extend(build_args)
-
     build_cmd.append('--builddir=%s' % build_dir_path)
-
-    install_dir_path = os.path.join(build_dir_path, 'local')
-    build_cmd.append('--install=%s' % install_dir_path)
+    build_cmd.append('--install=%s' % os.path.join(build_dir_path, 'local'))
 
     if options.toolchain:
         build_cmd.append('--toolchain=%s' % options.toolchain)
@@ -426,7 +422,7 @@ def run_test262_test_suite(options):
             print("\n%sBuild failed%s\n" % (TERM_RED, TERM_NORMAL))
             break
 
-        test_cmd = util.get_python_cmd_prefix() + [
+        test_cmd = [sys.executable,
             settings.TEST262_RUNNER_SCRIPT,
             '--engine', get_binary_path(build_dir_path),
             '--test262-object',
@@ -449,7 +445,7 @@ def run_test262_test_suite(options):
             test_cmd.append('--test262-test-list')
             test_cmd.append(options.test262_test_list)
 
-        ret_test |= run_check(test_cmd, env=dict(TZ='America/Los_Angeles'))
+        ret_test |= run_check(test_cmd, env=dict(TZ='America/Los_Angeles', PYTHONUTF8='1', PYTHONUNBUFFERED='1'))
 
     return ret_build | ret_test
 
