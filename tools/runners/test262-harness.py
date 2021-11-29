@@ -610,7 +610,7 @@ class TestCase(object):
             kwargs = {}
             if sys.version_info.major >= 3:
                 kwargs['errors'] = 'ignore'
-                kwargs['text'] = True
+                kwargs['universal_newlines'] = True
             process = subprocess.Popen(
                 args,
                 shell=False,

@@ -24,6 +24,10 @@ import sys
 
 import util
 
+print_kwargs = {}
+if sys.version_info.major >= 3:
+    print_kwargs["flush"] = True
+
 def get_arguments():
     execution_runtime = os.environ.get('RUNTIME', '')
     parser = argparse.ArgumentParser()
@@ -186,11 +190,14 @@ def main(args):
         kwargs['errors'] = 'ignore'
 
     if args.es51:
+        python_executable = '/usr/bin/python2'
         test262_harness_path = os.path.join(args.test262_harness_dir, 'tools/packaging/test262.py')
     else:
+        python_executable = sys.executable
         test262_harness_path = os.path.join(args.test262_harness_dir, 'test262-harness.py')
 
-    test262_command =  [sys.executable,
+
+    test262_command =  [python_executable, '-u',
                        test262_harness_path,
                        '--command', command,
                        '--tests', args.test_dir,
@@ -232,9 +239,9 @@ def main(args):
             elif re.search('in (non-)?strict mode', output):
                 counter += 1
                 if (counter % 100) == 0:
-                    print(".", end='')
+                    print(".", end='', **print_kwargs)
                 if (counter % 5000) == 0:
-                    print(" Executed %d tests." % counter)
+                    print(" Executed %d tests." % counter, **print_kwargs)
 
     proc.wait()
 
