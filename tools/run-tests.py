@@ -445,7 +445,7 @@ def run_test262_test_suite(options):
             test_cmd.append('--test262-test-list')
             test_cmd.append(options.test262_test_list)
 
-        ret_test |= run_check(test_cmd, env=dict(TZ='America/Los_Angeles', PYTHONUTF8='1', PYTHONUNBUFFERED='1'))
+        ret_test |= run_check(test_cmd, env=dict(TZ='America/Los_Angeles', PYTHONUTF8='1'))
 
     return ret_build | ret_test
 
