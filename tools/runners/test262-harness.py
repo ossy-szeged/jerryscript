@@ -32,7 +32,6 @@
 
 from __future__ import print_function
 
-import logging
 import optparse
 import os
 from os import path
@@ -89,9 +88,6 @@ def build_options():
                       help="default mode for tests of unspecified strictness")
     result.add_option("-j", "--job-count", default=None, action="store", type=int,
                       help="Number of parallel test jobs to run. In case of '0' cpu count is used.")
-    result.add_option("--logname", help="Filename to save stdout to")
-    result.add_option("--loglevel", default="warning",
-                      help="sets log level to debug, info, warning, error, or critical")
     result.add_option("--print-handle", default="print",
                       help="Command to print from console")
     result.add_option("--list-includes", default=False, action="store_true",
@@ -149,7 +145,7 @@ class TempFile(object):
             self.close()
             os.unlink(self.name)
         except OSError as exception:
-            logging.error("Error disposing temp file: %s", str(exception))
+            print("Error disposing temp file: %s", str(exception))
 
 
 class TestResult(object):
@@ -360,7 +356,6 @@ class TestCase(object):
         stdout = TempFile(prefix="test262-out-")
         stderr = TempFile(prefix="test262-err-")
         try:
-            logging.info("exec: %s", str(args))
             process = subprocess.Popen(
                 args,
                 shell=False,
@@ -475,7 +470,6 @@ class TestSuite(object):
         self.include_cache = {}
         self.exclude_list_path = options.exclude_list
         self.module_flag = options.module_flag
-        self.logf = None
 
     def _load_excludes(self):
         if self.exclude_list_path and os.path.exists(self.exclude_list_path):
@@ -523,7 +517,6 @@ class TestSuite(object):
     def enumerate_tests(self, tests, command_template):
         exclude_list = self._load_excludes()
 
-        logging.info("Listing tests in %s", self.test_root)
         cases = []
         for root, dirs, files in os.walk(self.test_root):
             for hidden_dir in [x for x in dirs if self.is_hidden(x)]:
@@ -534,7 +527,6 @@ class TestSuite(object):
                 if full_path.startswith(self.test_root):
                     rel_path = full_path[len(self.test_root)+1:]
                 else:
-                    logging.warning("Unexpected path %s", full_path)
                     rel_path = full_path
                 if self.should_run(rel_path, tests):
                     basename = path.basename(full_path)[:-3]
@@ -552,14 +544,11 @@ class TestSuite(object):
                             if not non_strict_case.is_only_strict():
                                 if non_strict_case.is_no_strict() or self.unmarked_default in ['both', 'non_strict']:
                                     cases.append(non_strict_case)
-        logging.info("Done listing tests")
         return cases
 
-    def print_summary(self, progress, logfile):
+    def print_summary(self, progress):
 
         def write(string):
-            if logfile:
-                self.logf.write(string + "\n")
             print(string)
 
         print("")
@@ -586,28 +575,22 @@ class TestSuite(object):
                 for result in negative:
                     write("  %s in %s" % (result.case.get_name(), result.case.get_mode()))
 
-    def print_failure_output(self, progress, logfile):
+    def print_failure_output(self, progress):
         for result in progress.failed_tests:
-            if logfile:
-                self.write_log(result)
             print("")
             result.report_outcome(False)
 
-    def run(self, command_template, tests, print_summary, full_summary, logname, job_count=1):
+    def run(self, command_template, tests, print_summary, full_summary, job_count=1):
         if not "{{path}}" in command_template:
             command_template += " {{path}}"
         cases = self.enumerate_tests(tests, command_template)
         if not cases:
             report_error("No tests to run")
         progress = ProgressIndicator(len(cases))
-        if logname:
-            self.logf = open(logname, "w")
 
         if job_count == 1:
             for case in cases:
                 result = case.run()
-                if logname:
-                    self.write_log(result)
                 progress.has_run(result)
         else:
             if job_count == 0:
@@ -616,40 +599,20 @@ class TestSuite(object):
             pool = multiprocessing.Pool(processes=job_count, initializer=pool_init)
             try:
                 for result in pool.imap(test_case_run_process, cases):
-                    if logname:
-                        self.write_log(result)
                     progress.has_run(result)
             except KeyboardInterrupt:
                 pool.terminate()
                 pool.join()
 
         if print_summary:
-            self.print_summary(progress, logname)
+            self.print_summary(progress)
             if full_summary:
-                self.print_failure_output(progress, logname)
+                self.print_failure_output(progress)
             else:
                 print("")
                 print("Use --full-summary to see output from failed tests")
         print("")
         return progress.failed
-
-    def write_log(self, result):
-        name = result.case.get_name()
-        mode = result.case.get_mode()
-        if result.has_unexpected_outcome():
-            if result.case.is_negative():
-                self.logf.write(
-                    "=== %s passed in %s, but was expected to fail === \n" % (name, mode))
-                self.logf.write("--- expected error: %s ---\n" % result.case.GetNegativeType())
-                result.write_output(self.logf)
-            else:
-                self.logf.write("=== %s failed in %s === \n" % (name, mode))
-                result.write_output(self.logf)
-            self.logf.write("===\n")
-        elif result.case.is_negative():
-            self.logf.write("%s failed in %s as expected \n" % (name, mode))
-        else:
-            self.logf.write("%s passed in %s \n" % (name, mode))
 
     def print_source(self, tests):
         cases = self.enumerate_tests(tests, "")
@@ -675,16 +638,6 @@ def main():
     test_suite = TestSuite(options)
 
     test_suite.validate()
-    if options.loglevel == 'debug':
-        logging.basicConfig(level=logging.DEBUG)
-    elif options.loglevel == 'info':
-        logging.basicConfig(level=logging.INFO)
-    elif options.loglevel == 'warning':
-        logging.basicConfig(level=logging.WARNING)
-    elif options.loglevel == 'error':
-        logging.basicConfig(level=logging.ERROR)
-    elif options.loglevel == 'critical':
-        logging.basicConfig(level=logging.CRITICAL)
 
     if options.cat:
         test_suite.print_source(args)
@@ -694,7 +647,6 @@ def main():
         code = test_suite.run(options.command, args,
                               options.summary or options.full_summary,
                               options.full_summary,
-                              options.logname,
                               options.job_count)
     return code
 
