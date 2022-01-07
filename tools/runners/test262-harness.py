@@ -593,14 +593,12 @@ def main():
     validate_options(options)
 
     test_suite = TestSuite(options)
-
     test_suite.validate()
 
-    code = test_suite.run(options.command, args,
+    return test_suite.run(options.command, args,
                           options.summary or options.full_summary,
                           options.full_summary,
                           options.job_count)
-    return code
 
 
 if __name__ == '__main__':
