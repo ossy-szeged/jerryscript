@@ -88,8 +88,6 @@ def build_options():
                       help="Number of parallel test jobs to run. In case of '0' cpu count is used.")
     result.add_option("--print-handle", default="print",
                       help="Command to print from console")
-    result.add_option("--module-flag", default="-m",
-                      help="List includes required by tests")
     return result
 
 
@@ -211,13 +209,12 @@ class TestResult(object):
 
 class TestCase(object):
 
-    def __init__(self, suite, name, full_path, strict_mode, command_template, module_flag):
+    def __init__(self, suite, name, full_path, strict_mode, command):
         self.suite = suite
         self.name = name
         self.full_path = full_path
         self.strict_mode = strict_mode
-        self.command_template = command_template
-        self.module_flag = module_flag
+        self.command = command
         self.test_record = {}
         self.parse_test_record()
         self.validate()
@@ -336,14 +333,6 @@ class TestCase(object):
         return source
 
     @staticmethod
-    def instantiate_template(template, params):
-        def get_parameter(match):
-            key = match.group(1)
-            return params.get(key, match.group(0))
-
-        return re.sub(r"\{\{(\w+)\}\}", get_parameter, template)
-
-    @staticmethod
     def execute(command):
         if is_windows():
             args = '%s' % command
@@ -373,14 +362,11 @@ class TestCase(object):
         tmp.write(self.get_source())
         tmp.close()
 
+        command = self.command
         if self.is_module():
-            arg = self.module_flag + ' ' + tmp.name
-        else:
-            arg = tmp.name
+            command += ' -m'
 
-        command = TestCase.instantiate_template(self.command_template, {
-            'path': arg
-        })
+        command += ' ' + tmp.name
 
         (code, out, err) = TestCase.execute(command)
         return TestResult(code, out, err, self)
@@ -503,7 +489,7 @@ class TestSuite(object):
                 report_error("Can't find: " + static)
         return self.include_cache[name]
 
-    def enumerate_tests(self, tests, command_template):
+    def enumerate_tests(self, tests, command):
         exclude_list = self._load_excludes()
 
         cases = []
@@ -522,12 +508,12 @@ class TestSuite(object):
                         print('Excluded: ' + rel_path)
                     else:
                         if not self.non_strict_only:
-                            strict_case = TestCase(self, name, full_path, True, command_template, self.module_flag)
+                            strict_case = TestCase(self, name, full_path, True, command)
                             if not strict_case.is_no_strict():
                                 if strict_case.is_only_strict() or self.unmarked_default in ['both', 'strict']:
                                     cases.append(strict_case)
                         if not self.strict_only:
-                            non_strict_case = TestCase(self, name, full_path, False, command_template, self.module_flag)
+                            non_strict_case = TestCase(self, name, full_path, False, command)
                             if not non_strict_case.is_only_strict():
                                 if non_strict_case.is_no_strict() or self.unmarked_default in ['both', 'non_strict']:
                                     cases.append(non_strict_case)
@@ -567,10 +553,8 @@ class TestSuite(object):
             print("")
             result.report_outcome(False)
 
-    def run(self, command_template, tests, print_summary, full_summary, job_count=1):
-        if not "{{path}}" in command_template:
-            command_template += " {{path}}"
-        cases = self.enumerate_tests(tests, command_template)
+    def run(self, command, tests, print_summary, full_summary, job_count=1):
+        cases = self.enumerate_tests(tests, command)
         if not cases:
             report_error("No tests to run")
         progress = ProgressIndicator(len(cases))
