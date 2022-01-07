@@ -274,9 +274,6 @@ class TestCase(object):
             return "strict mode"
         return "non-strict mode"
 
-    def get_path(self):
-        return self.name
-
     def is_negative(self):
         return 'negative' in self.test_record
 
@@ -444,7 +441,6 @@ class TestSuite(object):
         self.print_handle = options.print_handle
         self.include_cache = {}
         self.exclude_list_path = options.exclude_list
-        self.module_flag = options.module_flag
 
     def _load_excludes(self):
         if self.exclude_list_path and os.path.exists(self.exclude_list_path):
