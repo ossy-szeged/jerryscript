@@ -74,8 +74,6 @@ def build_options():
                       help="Path to the tests")
     result.add_option("--exclude-list", default=None,
                       help="Path to the excludelist.xml file")
-    result.add_option("--cat", default=False, action="store_true",
-                      help="Print packaged test code that would be run")
     result.add_option("--summary", default=False, action="store_true",
                       help="Print summary after running tests")
     result.add_option("--full-summary", default=False, action="store_true",
@@ -90,8 +88,6 @@ def build_options():
                       help="Number of parallel test jobs to run. In case of '0' cpu count is used.")
     result.add_option("--print-handle", default="print",
                       help="Command to print from console")
-    result.add_option("--list-includes", default=False, action="store_true",
-                      help="List includes required by tests")
     result.add_option("--module-flag", default="-m",
                       help="List includes required by tests")
     return result
@@ -397,9 +393,6 @@ class TestCase(object):
             tmp.dispose()
         return result
 
-    def print_source(self):
-        print(self.get_source())
-
     def validate(self):
         flags = self.test_record.get("flags")
         phase = self.get_negative_phase()
@@ -614,20 +607,6 @@ class TestSuite(object):
         print("")
         return progress.failed
 
-    def print_source(self, tests):
-        cases = self.enumerate_tests(tests, "")
-        if cases:
-            cases[0].print_source()
-
-    def list_includes(self, tests):
-        cases = self.enumerate_tests(tests, "")
-        includes_dict = Counter()
-        for case in cases:
-            includes = case.get_include_list()
-            includes_dict.update(includes)
-
-        print(includes_dict)
-
 
 def main():
     code = 0
@@ -639,15 +618,10 @@ def main():
 
     test_suite.validate()
 
-    if options.cat:
-        test_suite.print_source(args)
-    elif options.list_includes:
-        test_suite.list_includes(args)
-    else:
-        code = test_suite.run(options.command, args,
-                              options.summary or options.full_summary,
-                              options.full_summary,
-                              options.job_count)
+    code = test_suite.run(options.command, args,
+                          options.summary or options.full_summary,
+                          options.full_summary,
+                          options.job_count)
     return code
 
 
