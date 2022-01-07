@@ -358,25 +358,21 @@ class TestCase(object):
             stderr.dispose()
         return (code, out, err)
 
-    def run_test_in(self, tmp):
+    def run(self):
+        tmp = TempFile(suffix=".js", prefix="test262-")
         tmp.write(self.get_source())
         tmp.close()
-
         command = self.command
         if self.is_module():
             command += ' -m'
-
         command += ' ' + tmp.name
 
-        (code, out, err) = TestCase.execute(command)
-        return TestResult(code, out, err, self)
-
-    def run(self):
-        tmp = TempFile(suffix=".js", prefix="test262-")
         try:
-            result = self.run_test_in(tmp)
+            (code, out, err) = TestCase.execute(command)
+            result = TestResult(code, out, err, self)
         finally:
             tmp.dispose()
+
         return result
 
     def validate(self):
