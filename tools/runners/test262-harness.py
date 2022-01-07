@@ -479,10 +479,6 @@ class TestSuite(object):
             report_error("No test library found")
 
     @staticmethod
-    def is_hidden(test_path):
-        return test_path.startswith('.') or test_path == 'CVS'
-
-    @staticmethod
     def is_test_case(test_path):
         return test_path.endswith('.js') and not test_path.endswith('_FIXTURE.js')
 
@@ -512,8 +508,6 @@ class TestSuite(object):
 
         cases = []
         for root, dirs, files in os.walk(self.test_root):
-            for hidden_dir in [x for x in dirs if self.is_hidden(x)]:
-                dirs.remove(hidden_dir)
             dirs.sort()
             for test_path in filter(TestSuite.is_test_case, sorted(files)):
                 full_path = path.join(root, test_path)
