@@ -73,10 +73,6 @@ def build_options():
                       help="Path to the tests")
     result.add_option("--exclude-list", default=None,
                       help="Path to the excludelist.xml file")
-    result.add_option("--summary", default=False, action="store_true",
-                      help="Print summary after running tests")
-    result.add_option("--full-summary", default=False, action="store_true",
-                      help="Print summary and test output after running tests")
     result.add_option("--strict_only", default=False, action="store_true",
                       help="Test only strict mode")
     result.add_option("--non_strict_only", default=False, action="store_true",
@@ -149,7 +145,7 @@ class TestResult(object):
         self.stderr = stderr
         self.case = case
 
-    def report_outcome(self, long_format):
+    def report_outcome(self):
         name = self.case.get_name()
         mode = self.case.get_mode()
 
@@ -163,13 +159,9 @@ class TestResult(object):
                 print("=== %s passed in %s, but was expected to fail ===" % (name, mode))
                 print("--- expected error: %s ---\n" % self.case.get_negative_type())
             else:
-                if long_format:
-                    print("=== %s failed in %s ===" % (name, mode))
-                else:
-                    print("%s in %s: " % (name, mode))
+                print("=== %s failed in %s ===" % (name, mode))
             self.write_output(sys.stdout)
-            if long_format:
-                print("===")
+            print("===")
         elif self.case.is_negative():
             print("%s failed in %s as expected" % (name, mode))
         else:
@@ -383,7 +375,7 @@ class ProgressIndicator(object):
         self.failed_tests = []
 
     def has_run(self, result):
-        result.report_outcome(True)
+        result.report_outcome()
         if result.has_unexpected_outcome():
             self.failed += 1
             self.failed_tests.append(result)
@@ -512,12 +504,7 @@ class TestSuite(object):
                 for result in negative:
                     write("  %s in %s" % (result.case.get_name(), result.case.get_mode()))
 
-    def print_failure_output(self, progress):
-        for result in progress.failed_tests:
-            print("")
-            result.report_outcome(False)
-
-    def run(self, command, tests, print_summary, full_summary, job_count=1):
+    def run(self, command, tests, job_count=1):
         cases = self.enumerate_tests(tests, command)
         if not cases:
             report_error("No tests to run")
@@ -539,13 +526,7 @@ class TestSuite(object):
                 pool.terminate()
                 pool.join()
 
-        if print_summary:
-            self.print_summary(progress)
-            if full_summary:
-                self.print_failure_output(progress)
-            else:
-                print("")
-                print("Use --full-summary to see output from failed tests")
+        self.print_summary(progress)
         print("")
         return progress.failed
 
@@ -559,10 +540,7 @@ def main():
     test_suite = TestSuite(options)
     test_suite.validate()
 
-    return test_suite.run(options.command, args,
-                          options.summary or options.full_summary,
-                          options.full_summary,
-                          options.job_count)
+    return test_suite.run(options.command, args, options.job_count)
 
 
 if __name__ == '__main__':
