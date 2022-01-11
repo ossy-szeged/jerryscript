@@ -32,7 +32,6 @@
 
 from __future__ import print_function
 
-import logging
 import optparse
 import os
 from os import path
@@ -74,8 +73,6 @@ def build_options():
                       help="Path to the tests")
     result.add_option("--exclude-list", default=None,
                       help="Path to the excludelist.xml file")
-    result.add_option("--cat", default=False, action="store_true",
-                      help="Print packaged test code that would be run")
     result.add_option("--summary", default=False, action="store_true",
                       help="Print summary after running tests")
     result.add_option("--full-summary", default=False, action="store_true",
@@ -88,15 +85,8 @@ def build_options():
                       help="default mode for tests of unspecified strictness")
     result.add_option("-j", "--job-count", default=None, action="store", type=int,
                       help="Number of parallel test jobs to run. In case of '0' cpu count is used.")
-    result.add_option("--logname", help="Filename to save stdout to")
-    result.add_option("--loglevel", default="warning",
-                      help="sets log level to debug, info, warning, error, or critical")
     result.add_option("--print-handle", default="print",
                       help="Command to print from console")
-    result.add_option("--list-includes", default=False, action="store_true",
-                      help="List includes required by tests")
-    result.add_option("--module-flag", default="-m",
-                      help="List includes required by tests")
     return result
 
 
@@ -148,7 +138,7 @@ class TempFile(object):
             self.close()
             os.unlink(self.name)
         except OSError as exception:
-            logging.error("Error disposing temp file: %s", str(exception))
+            print("Error disposing temp file: %s", str(exception))
 
 
 class TestResult(object):
@@ -218,16 +208,14 @@ class TestResult(object):
 
 class TestCase(object):
 
-    def __init__(self, suite, name, full_path, strict_mode, command_template, module_flag):
+    def __init__(self, suite, name, full_path, strict_mode, command):
         self.suite = suite
         self.name = name
         self.full_path = full_path
         self.strict_mode = strict_mode
-        self.command_template = command_template
-        self.module_flag = module_flag
+        self.command = command
         self.test_record = {}
         self.parse_test_record()
-        self.validate()
 
     def parse_test_record(self):
         with open(self.full_path, "rb") as file_desc:
@@ -277,9 +265,6 @@ class TestCase(object):
         if self.strict_mode:
             return "strict mode"
         return "non-strict mode"
-
-    def get_path(self):
-        return self.name
 
     def is_negative(self):
         return 'negative' in self.test_record
@@ -337,14 +322,6 @@ class TestCase(object):
         return source
 
     @staticmethod
-    def instantiate_template(template, params):
-        def get_parameter(match):
-            key = match.group(1)
-            return params.get(key, match.group(0))
-
-        return re.sub(r"\{\{(\w+)\}\}", get_parameter, template)
-
-    @staticmethod
     def execute(command):
         if is_windows():
             args = '%s' % command
@@ -353,7 +330,6 @@ class TestCase(object):
         stdout = TempFile(prefix="test262-out-")
         stderr = TempFile(prefix="test262-err-")
         try:
-            logging.info("exec: %s", str(args))
             process = subprocess.Popen(
                 args,
                 shell=False,
@@ -371,52 +347,22 @@ class TestCase(object):
             stderr.dispose()
         return (code, out, err)
 
-    def run_test_in(self, tmp):
-        tmp.write(self.get_source())
-        tmp.close()
-
-        if self.is_module():
-            arg = self.module_flag + ' ' + tmp.name
-        else:
-            arg = tmp.name
-
-        command = TestCase.instantiate_template(self.command_template, {
-            'path': arg
-        })
-
-        (code, out, err) = TestCase.execute(command)
-        return TestResult(code, out, err, self)
-
     def run(self):
         tmp = TempFile(suffix=".js", prefix="test262-")
+        tmp.write(self.get_source())
+        tmp.close()
+        command = self.command
+        if self.is_module():
+            command += ' -m'
+        command += ' ' + tmp.name
+
         try:
-            result = self.run_test_in(tmp)
+            (code, out, err) = TestCase.execute(command)
+            result = TestResult(code, out, err, self)
         finally:
             tmp.dispose()
+
         return result
-
-    def print_source(self):
-        print(self.get_source())
-
-    def validate(self):
-        flags = self.test_record.get("flags")
-        phase = self.get_negative_phase()
-
-        if phase not in [None, False, "parse", "early", "runtime", "resolution"]:
-            raise TypeError("Invalid value for negative phase: " + phase)
-
-        if not flags:
-            return
-
-        if 'raw' in flags:
-            if 'noStrict' in flags:
-                raise TypeError("The `raw` flag implies the `noStrict` flag")
-            elif 'onlyStrict' in flags:
-                raise TypeError(
-                    "The `raw` flag is incompatible with the `onlyStrict` flag")
-            elif self.get_include_list():
-                raise TypeError(
-                    "The `raw` flag is incompatible with the `includes` tag")
 
 
 def pool_init():
@@ -467,8 +413,6 @@ class TestSuite(object):
         self.print_handle = options.print_handle
         self.include_cache = {}
         self.exclude_list_path = options.exclude_list
-        self.module_flag = options.module_flag
-        self.logf = None
 
     def _load_excludes(self):
         if self.exclude_list_path and os.path.exists(self.exclude_list_path):
@@ -483,10 +427,6 @@ class TestSuite(object):
             report_error("No test repository found")
         if not path.exists(self.lib_root):
             report_error("No test library found")
-
-    @staticmethod
-    def is_hidden(test_path):
-        return test_path.startswith('.') or test_path == 'CVS'
 
     @staticmethod
     def is_test_case(test_path):
@@ -513,21 +453,17 @@ class TestSuite(object):
                 report_error("Can't find: " + static)
         return self.include_cache[name]
 
-    def enumerate_tests(self, tests, command_template):
+    def enumerate_tests(self, tests, command):
         exclude_list = self._load_excludes()
 
-        logging.info("Listing tests in %s", self.test_root)
         cases = []
         for root, dirs, files in os.walk(self.test_root):
-            for hidden_dir in [x for x in dirs if self.is_hidden(x)]:
-                dirs.remove(hidden_dir)
             dirs.sort()
             for test_path in filter(TestSuite.is_test_case, sorted(files)):
                 full_path = path.join(root, test_path)
                 if full_path.startswith(self.test_root):
                     rel_path = full_path[len(self.test_root)+1:]
                 else:
-                    logging.warning("Unexpected path %s", full_path)
                     rel_path = full_path
                 if self.should_run(rel_path, tests):
                     basename = path.basename(full_path)[:-3]
@@ -536,23 +472,20 @@ class TestSuite(object):
                         print('Excluded: ' + rel_path)
                     else:
                         if not self.non_strict_only:
-                            strict_case = TestCase(self, name, full_path, True, command_template, self.module_flag)
+                            strict_case = TestCase(self, name, full_path, True, command)
                             if not strict_case.is_no_strict():
                                 if strict_case.is_only_strict() or self.unmarked_default in ['both', 'strict']:
                                     cases.append(strict_case)
                         if not self.strict_only:
-                            non_strict_case = TestCase(self, name, full_path, False, command_template, self.module_flag)
+                            non_strict_case = TestCase(self, name, full_path, False, command)
                             if not non_strict_case.is_only_strict():
                                 if non_strict_case.is_no_strict() or self.unmarked_default in ['both', 'non_strict']:
                                     cases.append(non_strict_case)
-        logging.info("Done listing tests")
         return cases
 
-    def print_summary(self, progress, logfile):
+    def print_summary(self, progress):
 
         def write(string):
-            if logfile:
-                self.logf.write(string + "\n")
             print(string)
 
         print("")
@@ -579,28 +512,20 @@ class TestSuite(object):
                 for result in negative:
                     write("  %s in %s" % (result.case.get_name(), result.case.get_mode()))
 
-    def print_failure_output(self, progress, logfile):
+    def print_failure_output(self, progress):
         for result in progress.failed_tests:
-            if logfile:
-                self.write_log(result)
             print("")
             result.report_outcome(False)
 
-    def run(self, command_template, tests, print_summary, full_summary, logname, job_count=1):
-        if not "{{path}}" in command_template:
-            command_template += " {{path}}"
-        cases = self.enumerate_tests(tests, command_template)
+    def run(self, command, tests, print_summary, full_summary, job_count=1):
+        cases = self.enumerate_tests(tests, command)
         if not cases:
             report_error("No tests to run")
         progress = ProgressIndicator(len(cases))
-        if logname:
-            self.logf = open(logname, "w")
 
         if job_count == 1:
             for case in cases:
                 result = case.run()
-                if logname:
-                    self.write_log(result)
                 progress.has_run(result)
         else:
             if job_count == 0:
@@ -609,54 +534,20 @@ class TestSuite(object):
             pool = multiprocessing.Pool(processes=job_count, initializer=pool_init)
             try:
                 for result in pool.imap(test_case_run_process, cases):
-                    if logname:
-                        self.write_log(result)
                     progress.has_run(result)
             except KeyboardInterrupt:
                 pool.terminate()
                 pool.join()
 
         if print_summary:
-            self.print_summary(progress, logname)
+            self.print_summary(progress)
             if full_summary:
-                self.print_failure_output(progress, logname)
+                self.print_failure_output(progress)
             else:
                 print("")
                 print("Use --full-summary to see output from failed tests")
         print("")
         return progress.failed
-
-    def write_log(self, result):
-        name = result.case.get_name()
-        mode = result.case.get_mode()
-        if result.has_unexpected_outcome():
-            if result.case.is_negative():
-                self.logf.write(
-                    "=== %s passed in %s, but was expected to fail === \n" % (name, mode))
-                self.logf.write("--- expected error: %s ---\n" % result.case.GetNegativeType())
-                result.write_output(self.logf)
-            else:
-                self.logf.write("=== %s failed in %s === \n" % (name, mode))
-                result.write_output(self.logf)
-            self.logf.write("===\n")
-        elif result.case.is_negative():
-            self.logf.write("%s failed in %s as expected \n" % (name, mode))
-        else:
-            self.logf.write("%s passed in %s \n" % (name, mode))
-
-    def print_source(self, tests):
-        cases = self.enumerate_tests(tests, "")
-        if cases:
-            cases[0].print_source()
-
-    def list_includes(self, tests):
-        cases = self.enumerate_tests(tests, "")
-        includes_dict = Counter()
-        for case in cases:
-            includes = case.get_include_list()
-            includes_dict.update(includes)
-
-        print(includes_dict)
 
 
 def main():
@@ -666,30 +557,12 @@ def main():
     validate_options(options)
 
     test_suite = TestSuite(options)
-
     test_suite.validate()
-    if options.loglevel == 'debug':
-        logging.basicConfig(level=logging.DEBUG)
-    elif options.loglevel == 'info':
-        logging.basicConfig(level=logging.INFO)
-    elif options.loglevel == 'warning':
-        logging.basicConfig(level=logging.WARNING)
-    elif options.loglevel == 'error':
-        logging.basicConfig(level=logging.ERROR)
-    elif options.loglevel == 'critical':
-        logging.basicConfig(level=logging.CRITICAL)
 
-    if options.cat:
-        test_suite.print_source(args)
-    elif options.list_includes:
-        test_suite.list_includes(args)
-    else:
-        code = test_suite.run(options.command, args,
-                              options.summary or options.full_summary,
-                              options.full_summary,
-                              options.logname,
-                              options.job_count)
-    return code
+    return test_suite.run(options.command, args,
+                          options.summary or options.full_summary,
+                          options.full_summary,
+                          options.job_count)
 
 
 if __name__ == '__main__':
