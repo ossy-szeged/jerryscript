@@ -12,9 +12,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.10'
       - run: sudo apt update
       - run: sudo apt install pylint doxygen cppcheck clang-format-15
       - run: $RUNNER --check-signed-off=gh-actions
@@ -36,9 +33,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: $RUNNER -q --jerry-tests
       - run: $RUNNER -q --jerry-tests --build-debug
       - run: $RUNNER -q --jerry-debugger
@@ -48,9 +42,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: sudo apt update
       - run: sudo apt install gcc-multilib
       - run: $RUNNER -q --jerry-tests --buildoptions=--compile-flag=-m32,--cpointer-32bit=on
@@ -60,9 +51,6 @@ jobs:
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: $RUNNER -q --jerry-tests
       - run: $RUNNER -q --unittests
 
@@ -70,9 +58,6 @@ jobs:
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: $RUNNER -q --jerry-tests --build-debug
       - run: $RUNNER -q --unittests --build-debug
 
@@ -80,9 +65,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: sudo apt update
       - run: sudo apt install gcc-multilib
       - run: $RUNNER --buildoption-test
@@ -91,9 +73,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: $RUNNER --test262 update
       - uses: actions/upload-artifact@v4
         if: success() || failure()
@@ -106,9 +85,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: $RUNNER --test262 update --build-debug --test262-test-list=built-ins,annexB,harness,intl402
       - uses: actions/upload-artifact@v4
         if: success() || failure()
@@ -121,9 +97,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: $RUNNER --test262 update --build-debug --test262-test-list=language
       - uses: actions/upload-artifact@v4
         if: success() || failure()
@@ -136,9 +109,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: $RUNNER -q --unittests
       - run: $RUNNER -q --unittests --build-debug
 
@@ -148,9 +118,6 @@ jobs:
       CC: clang
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: sudo apt update
       - run: sudo apt install gcc-multilib
       - run: $RUNNER -q --unittests
@@ -163,9 +130,6 @@ jobs:
       ASAN_OPTIONS: detect_stack_use_after_return=1:check_initialization_order=true:strict_init_order=true
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: sudo apt update
       - run: sudo apt install gcc-multilib
       - run: >-
@@ -179,9 +143,6 @@ jobs:
       ASAN_OPTIONS: detect_stack_use_after_return=1:check_initialization_order=true:strict_init_order=true
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: sudo apt update
       - run: sudo apt install gcc-multilib
       - run: >-
@@ -195,9 +156,6 @@ jobs:
       UBSAN_OPTIONS: print_stacktrace=1
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: sudo apt update
       - run: sudo apt install gcc-multilib
       - run: >-
@@ -216,9 +174,6 @@ jobs:
       TIMEOUT: 300
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: sudo apt update
       - run: sudo apt install gcc-arm-linux-gnueabihf libc6-dev-armhf-cross qemu-user-static
       - run: >-
@@ -232,9 +187,6 @@ jobs:
       TIMEOUT: 300
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: sudo apt update
       - run: sudo apt install gcc-arm-linux-gnueabihf libc6-dev-armhf-cross qemu-user-static
       - run: >-
@@ -248,9 +200,6 @@ jobs:
       TIMEOUT: 300
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: sudo apt update
       - run: sudo apt install gcc-aarch64-linux-gnu libc6-dev-armhf-cross qemu-user-static
       - run: >-
@@ -264,9 +213,6 @@ jobs:
       TIMEOUT: 300
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: sudo apt update
       - run: sudo apt install gcc-aarch64-linux-gnu libc6-dev-armhf-cross qemu-user-static
       - run: >-
@@ -277,9 +223,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: sudo apt update
       - run: sudo apt install gcc-arm-none-eabi ninja-build
       - run: make -f ./targets/os/mbedos/Makefile.travis install
@@ -289,9 +232,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: sudo apt update
       - run: sudo apt install gperf dfu-util device-tree-compiler
       - run: make -f ./targets/os/zephyr/Makefile.travis install
@@ -301,9 +241,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.6'
       - run: sudo apt update
       - run: sudo apt install gcc-arm-none-eabi libnewlib-arm-none-eabi gperf
       - run: make -f ./targets/os/nuttx/Makefile.travis install-noapt
@@ -323,9 +260,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '>=3.8'
       - run: make -f ./targets/baremetal-sdk/espressif/esp8266-rtos-sdk/Makefile.travis install-noapt
       - run: make -f ./targets/baremetal-sdk/espressif/esp8266-rtos-sdk/Makefile.travis script
 
@@ -333,9 +267,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '==3.8'
       - run: make -f ./targets/baremetal-sdk/espressif/esp-idf/Makefile.travis install-noapt
       - run: make -f ./targets/baremetal-sdk/espressif/esp-idf/Makefile.travis script
 
