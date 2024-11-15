@@ -7,7 +7,7 @@ env:
 
 jobs:
   Checks:
-    runs-on: ubuntu-22.04 # needed for checker version stability
+    runs-on: ubuntu-20.04 # needed for checker version stability
     steps:
       - uses: actions/checkout@v2
         with:
@@ -33,7 +33,7 @@ jobs:
         if: ${{ always() }}
 
   Linux_x86-64_Build_Correctness_Debugger_Tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v4
@@ -45,7 +45,7 @@ jobs:
       - run: $RUNNER -q --jerry-debugger --build-debug
 
   Linux_x86_cpointer-32bit_Build_Correctness_Tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v4
@@ -77,7 +77,7 @@ jobs:
       - run: $RUNNER -q --unittests --build-debug
 
   Linux_x86-64_Build_Option_Tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v4
@@ -88,7 +88,7 @@ jobs:
       - run: $RUNNER --buildoption-test
 
   Conformance_Tests_ESNext:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v4
@@ -103,7 +103,7 @@ jobs:
             build/tests/test262_tests_esnext/local/bin/test262.report
 
   Conformance_Tests_ESNext_Debug_A:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v4
@@ -118,7 +118,7 @@ jobs:
             build/tests/test262_tests_esnext-debug/local/bin/test262.report
 
   Conformance_Tests_ESNext_Debug_B:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v4
@@ -133,7 +133,7 @@ jobs:
             build/tests/test262_tests_esnext-debug/local/bin/test262.report
 
   Unit_Tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v4
@@ -143,7 +143,7 @@ jobs:
       - run: $RUNNER -q --unittests --build-debug
 
   Clang_Unit_Build_Option_Tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       CC: clang
     steps:
@@ -158,7 +158,7 @@ jobs:
       - run: $RUNNER -q --buildoption-test --buildoptions=--lto=off
 
   ASAN_Tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       ASAN_OPTIONS: detect_stack_use_after_return=1:check_initialization_order=true:strict_init_order=true
     steps:
@@ -174,7 +174,7 @@ jobs:
           --skip-list=parser-oom.js,parser-oom2.js,stack-limit.js,regression-test-issue-4901.js,regression-test-issue-4848.js,regression-test-issue-4890.js,regression-test-issue-2190.js,regression-test-issue-2258-2963.js,regression-test-issue-2448.js,regression-test-issue-2905.js,regression-test-issue-3785.js,proxy-evil-recursion.js,regression-test-issue-5101.js
 
   ASAN_Tests_Debug:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       ASAN_OPTIONS: detect_stack_use_after_return=1:check_initialization_order=true:strict_init_order=true
     steps:
@@ -190,7 +190,7 @@ jobs:
           --skip-list=parser-oom.js,parser-oom2.js,stack-limit.js,regression-test-issue-4901.js,regression-test-issue-4848.js,regression-test-issue-4890.js,regression-test-issue-2190.js,regression-test-issue-2258-2963.js,regression-test-issue-2448.js,regression-test-issue-2905.js,regression-test-issue-3785.js,proxy-evil-recursion.js,regression-test-issue-5101.js
 
   UBSAN_Tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       UBSAN_OPTIONS: print_stacktrace=1
     steps:
@@ -210,7 +210,7 @@ jobs:
           --skip-list=parser-oom.js,parser-oom2.js
 
   Linux_ARMv7l_Tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       RUNTIME: qemu-arm-static
       TIMEOUT: 300
@@ -226,7 +226,7 @@ jobs:
           --buildoptions=--toolchain=cmake/toolchain_linux_armv7l.cmake,--linker-flag=-static
 
   Linux_ARMv7l_Tests_Debug:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       RUNTIME: qemu-arm-static
       TIMEOUT: 300
@@ -242,7 +242,7 @@ jobs:
           --buildoptions=--toolchain=cmake/toolchain_linux_armv7l.cmake,--linker-flag=-static
 
   Linux_AArch64_Tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       RUNTIME: qemu-aarch64-static
       TIMEOUT: 300
@@ -258,7 +258,7 @@ jobs:
           --buildoptions=--toolchain=cmake/toolchain_linux_aarch64.cmake,--linker-flag=-static
 
   Linux_AArch64_Tests_Debug:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       RUNTIME: qemu-aarch64-static
       TIMEOUT: 300
@@ -274,7 +274,7 @@ jobs:
           --buildoptions=--toolchain=cmake/toolchain_linux_aarch64.cmake,--linker-flag=-static
 
   MbedOS_K64F_Build_Test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v4
@@ -286,7 +286,7 @@ jobs:
       - run: make -f ./targets/os/mbedos/Makefile.travis script
 
   Zephyr_STM32F4_Build_Test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v4
@@ -298,7 +298,7 @@ jobs:
       - run: make -f ./targets/os/zephyr/Makefile.travis script
 
   NuttX_STM32F4_Build_Test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v4
@@ -310,7 +310,7 @@ jobs:
       - run: make -f ./targets/os/nuttx/Makefile.travis script
 
   RIOT_STM32F4_Build_Test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       CC: clang
     steps:
@@ -320,7 +320,7 @@ jobs:
       - run: make -f ./targets/os/riot/Makefile.travis script
 
   ESP8266_RTOS_SDK_Build_Test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v4
@@ -330,7 +330,7 @@ jobs:
       - run: make -f ./targets/baremetal-sdk/espressif/esp8266-rtos-sdk/Makefile.travis script
 
   ESP_IDF_Build_Test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v4
@@ -340,7 +340,7 @@ jobs:
       - run: make -f ./targets/baremetal-sdk/espressif/esp-idf/Makefile.travis script
 
   Notification:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     if: false && github.event_name == 'push' && github.repository == 'jerryscript-project/jerryscript'
     steps:
       - uses: rectalogic/notify-irc@v1
